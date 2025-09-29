@@ -243,6 +243,14 @@ section {
     margin-bottom: 120px;
 }
 
+/* Desktop: Perkecil font paragraf About */
+@media (min-width: 1024px) {
+    #about .about-description p {
+        font-size: 0.7rem; /* ukuran lebih kecil */
+        line-height: 1.5;
+    }
+}
+
 .about-stats {
     display: flex;
     gap: 2rem;
