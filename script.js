@@ -32,20 +32,41 @@ formInputs.forEach(input => {
     input.addEventListener('input', checkFormValidity);
 });
 
-// Form Submission
-contactForm.addEventListener('submit', function(e) {
+// Form Submission - DIPERBAIKI
+contactForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
+    const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Mengirim...';
     submitBtn.disabled = true;
     
-    // Simulate form submission
-    setTimeout(() => {
-        alert('Pesan Anda telah berhasil dikirim! Saya akan membalasnya segera.');
-        contactForm.reset();
-        submitBtn.textContent = 'Kirim Pesan';
-        submitBtn.disabled = true;
-    }, 500);
+    try {
+        // Kirim data ke Formspree
+        const formData = new FormData(contactForm);
+        
+        const response = await fetch('https://formspree.io/f/xovkjolv', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            alert('Pesan Anda telah berhasil dikirim! Saya akan membalasnya segera.');
+            contactForm.reset();
+            submitBtn.disabled = true;
+        } else {
+            throw new Error('Gagal mengirim pesan');
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Maaf, terjadi kesalahan saat mengirim pesan. Silakan coba lagi atau hubungi saya langsung melalui email.');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
 });
 
 // Animasi untuk beranda dengan delay
