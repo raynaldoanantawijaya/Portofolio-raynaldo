@@ -32,7 +32,7 @@ formInputs.forEach(input => {
     input.addEventListener('input', checkFormValidity);
 });
 
-// Form Submission - DIPERBAIKI
+// Form Submission
 contactForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -41,7 +41,6 @@ contactForm.addEventListener('submit', async function(e) {
     submitBtn.disabled = true;
     
     try {
-        // Kirim data ke Formspree
         const formData = new FormData(contactForm);
         
         const response = await fetch('https://formspree.io/f/xovkjolv', {
@@ -69,86 +68,31 @@ contactForm.addEventListener('submit', async function(e) {
     }
 });
 
-// Animasi untuk beranda dengan delay
-function animateHomeSection() {
-    const homeLeft = document.querySelector('.home-left.fade-in');
-    const homeRight = document.querySelector('.home-right.fade-in');
-    
-    // Delay sebelum memulai animasi beranda
-    setTimeout(() => {
-        if (homeLeft) homeLeft.classList.add('visible');
-    }, 500); // Delay 500ms untuk teks
-    
-    setTimeout(() => {
-        if (homeRight) homeRight.classList.add('visible');
-    }, 1000); // Delay 1000ms untuk foto
+// Fungsi umum untuk animasi masuk dengan delay lebih lambat
+function observeElements(selector, className = 'visible', rootMargin = '0px 0px -200px 0px', delay = 300) {
+    const elements = document.querySelectorAll(selector);
+
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.classList.add(className);
+                }, index * delay); // delay per elemen
+                obs.unobserve(entry.target);
+            }
+        });
+    }, { rootMargin });
+
+    elements.forEach(el => observer.observe(el));
 }
 
-// Fungsi untuk animasi proyek satu-satu
-function animateProjects() {
-    const projectCards = document.querySelectorAll('.project-card.fade-in');
-    
-    projectCards.forEach((card, index) => {
-        // Set custom property untuk delay
-        card.style.setProperty('--project-index', index);
-        
-        const cardTop = card.getBoundingClientRect().top;
-        const windowHeight = window.innerHeight;
-        
-        if (cardTop < windowHeight - 100) {
-            setTimeout(() => {
-                card.classList.add('visible');
-            }, index * 200); // Delay 200ms per proyek
-        }
-    });
-}
-
-// Modifikasi fungsi checkScroll()
-function checkScroll() {
-    const fadeElements = document.querySelectorAll('.fade-in:not(#home .fade-in):not(.project-card)');
-    fadeElements.forEach(element => {
-        const elementTop = element.getBoundingClientRect().top;
-        const windowHeight = window.innerHeight;
-        
-        if (elementTop < windowHeight - 100) {
-            element.classList.add('visible');
-        }
-    });
-    
-    // Panggil fungsi animasi proyek
-    animateProjects();
-}
-
-// Individual skill items animation
-function checkSkillsScroll() {
-    const skillItems = document.querySelectorAll('.skill-item');
-    
-    skillItems.forEach((item, index) => {
-        const itemTop = item.getBoundingClientRect().top;
-        const windowHeight = window.innerHeight;
-        
-        if (itemTop < windowHeight - 100) {
-            setTimeout(() => {
-                item.classList.add('visible');
-            }, index * 100);
-        }
-    });
-}
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Jalankan animasi beranda dengan delay
-    animateHomeSection();
-    
-    // Check scroll untuk section lainnya
-    checkScroll();
-    checkSkillsScroll();
-});
-
-// Check on scroll
-window.addEventListener('scroll', function() {
-    checkScroll();
-    checkSkillsScroll();
+// Animasi beranda dan section lainnya
+document.addEventListener('DOMContentLoaded', () => {
+    observeElements('.home-left.fade-in', 'visible', '0px 0px -200px 0px', 500);   // teks beranda
+    observeElements('.home-right.fade-in', 'visible', '0px 0px -200px 0px', 800); // foto beranda
+    observeElements('.project-card.fade-in', 'visible', '0px 0px -200px 0px', 400); // proyek
+    observeElements('.skill-item', 'visible', '0px 0px -200px 0px', 200);          // skill
+    observeElements('.fade-in:not(.project-card):not(.skill-item)', 'visible', '0px 0px -200px 0px', 300);
 });
 
 // Smooth scrolling for anchor links
