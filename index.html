@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portofolio Raynaldo Ananta Wijaya</title>
+   
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <!-- ✅ Preload font dan style utama untuk mempercepat LCP -->
     <link rel="preload" href="/assets/fonts/Poppins-Regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/Poppins-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
@@ -13,9 +18,6 @@
        <!-- Preload foto profil utama (hero / LCP) -->
     <link rel="preload" as="image" href="assets/Foto/raynaldo.webp" type="image/webp">
     <link rel="preload" as="image" href="assets/Foto/raynaldo.jpg" type="image/jpeg">
-
-       <!-- Preload logo jika muncul langsung di header -->
-    <link rel="preload" as="image" href="assets/Foto/logo.png" type="image/png">
    
     <!-- ✅ Local font & icon CSS -->
     <link rel="stylesheet" href="assets/css/all.min.css">
@@ -68,9 +70,13 @@
             </div>
             <div class="home-right fade-in">
                <picture>
-                   <source srcset="assets/Foto/raynaldo.webp" type="image/webp">
-                   <img src="assets/Foto/raynaldo.jpg" alt="Foto Profil" class="profile-image" loading="lazy" width="250" height="333" fetchpriority="high">
-               </picture>
+  <source srcset="assets/Foto/raynaldo.webp" type="image/webp">
+  <img src="assets/Foto/raynaldo.jpg"
+       alt="Foto Profil"
+       class="profile-image"
+       width="250" height="333"
+       fetchpriority="high">
+</picture>
             </div>
         </div>
     </section>
@@ -246,6 +252,6 @@
         <p class="copyright">&copy; 2025 Portofolio Raynaldo Ananta Wijaya. All rights reserved.</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
