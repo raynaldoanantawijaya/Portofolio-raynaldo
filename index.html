@@ -4,10 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portofolio Raynaldo Ananta Wijaya</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ✅ Preload font dan style utama untuk mempercepat LCP -->
+    <link rel="preload" href="/assets/fonts/Poppins-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/Poppins-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/fonts/Poppins-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/assets/css/all.min.css" as="style">
+    <link rel="preload" href="/styles.css" as="style">
+       <!-- Preload foto profil utama (hero / LCP) -->
+    <link rel="preload" as="image" href="assets/Foto/raynaldo.webp" type="image/webp">
+    <link rel="preload" as="image" href="assets/Foto/raynaldo.jpg" type="image/jpeg">
+
+       <!-- Preload logo jika muncul langsung di header -->
+    <link rel="preload" as="image" href="assets/Foto/logo.png" type="image/png">
+   
+    <!-- ✅ Local font & icon CSS -->
+    <link rel="stylesheet" href="assets/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+   
     <link rel="icon" type="image/png" href="https://raynaldoanantawijaya.my.id/assets/Foto/logo.png">
     <link rel="apple-touch-icon" href="https://raynaldoanantawijaya.my.id/assets/Foto/logo.png">
     <link rel="shortcut icon" href="https://raynaldoanantawijaya.my.id/assets/Foto/logo.png" type="image/x-icon">
@@ -20,7 +33,6 @@
       "logo": "https://raynaldoanantawijaya.my.id/assets/Foto/logo.png"
    }
     </script>
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Header - Diperbesar -->
@@ -55,7 +67,10 @@
                 </div>
             </div>
             <div class="home-right fade-in">
-                <img src="assets/Foto/raynaldo.jpg" alt="Foto Profil" class="profile-image">
+               <picture>
+                   <source srcset="assets/Foto/raynaldo.webp" type="image/webp">
+                   <img src="assets/Foto/raynaldo.jpg" alt="Foto Profil" class="profile-image" loading="lazy" width="250" height="333" fetchpriority="high">
+               </picture>
             </div>
         </div>
     </section>
@@ -85,7 +100,15 @@
 
                 <!-- Foto kecil di kiri bawah -->
                 <div class="about-photo-small">
-                    <img src="assets/Foto/raynaldo.jpg" alt="Foto Kecil Profil">
+                 <picture>
+                     <source srcset="assets/Foto/raynaldo.webp" type="image/webp">
+                       <img src="assets/Foto/raynaldo.jpg" 
+                            alt="Foto Kecil Profil" 
+                            width="80" height="80" 
+                            class="about-photo-img"
+                            loading="lazy">
+                  </picture>
+                </div>
                 </div>
             </div>
             
