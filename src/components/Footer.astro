@@ -1,0 +1,127 @@
+---
+import { getSiteContent } from '../lib/firestoreService';
+import { defaultContent } from '../data/siteContent';
+
+// Fetch content
+let content = defaultContent;
+try {
+    content = await getSiteContent();
+} catch (error) {
+    console.error('Footer fetch error:', error);
+}
+
+const { socialLinks } = content;
+
+// Helper parsing icon
+function parseIcon(iconValue: string) {
+    if (!iconValue) return { iconClass: '', color: '' };
+    const parts = iconValue.split('|');
+    return {
+        iconClass: parts[0] || '',
+        color: parts[1] || ''
+    };
+}
+
+const emailIcon = parseIcon(socialLinks.emailIcon);
+const linkedinIcon = parseIcon(socialLinks.linkedinIcon);
+const instagramIcon = parseIcon(socialLinks.instagramIcon);
+const youtubeIcon = parseIcon(socialLinks.youtubeIcon);
+---
+
+<footer id="site-footer">
+    <div class="social-links" id="social-links-container">
+        <a href={`https://mail.google.com/mail/?view=cm&to=${socialLinks.email}`} target="_blank" data-social="email">
+            <i class={emailIcon.iconClass} style={emailIcon.color ? `color: ${emailIcon.color}` : ''} id="email-icon"></i>
+        </a>
+        <a href={`https://www.linkedin.com/in/${socialLinks.linkedin}`} target="_blank" data-social="linkedin">
+            <i class={linkedinIcon.iconClass} style={linkedinIcon.color ? `color: ${linkedinIcon.color}` : ''} id="linkedin-icon"></i>
+        </a>
+        <a href={`https://www.instagram.com/${socialLinks.instagram}`} target="_blank" data-social="instagram">
+            <i class={instagramIcon.iconClass} style={instagramIcon.color ? `color: ${instagramIcon.color}` : ''} id="instagram-icon"></i>
+        </a>
+        <a href={`https://youtube.com/${socialLinks.youtube}`} target="_blank" data-social="youtube">
+            <i class={youtubeIcon.iconClass} style={youtubeIcon.color ? `color: ${youtubeIcon.color}` : ''} id="youtube-icon"></i>
+        </a>
+    </div>
+    <div class="copyright">
+        <p>&copy; 2025 Portofolio Raynaldo Ananta Wijaya. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    // Parse icon value - format: "iconClass" or "iconClass|color"
+    function parseIcon(iconValue: string): { iconClass: string; color: string } {
+        if (!iconValue) return { iconClass: '', color: '' };
+        const parts = iconValue.split('|');
+        return {
+            iconClass: parts[0] || '',
+            color: parts[1] || ''
+        };
+    }
+
+    // Sync social links from localStorage
+    function syncSocialLinks() {
+        try {
+            const stored = localStorage.getItem('site_content_v1');
+            if (!stored) return;
+            
+            const data = JSON.parse(stored);
+            const socialLinks = data.socialLinks;
+            if (!socialLinks) return;
+            
+            // Update email link and icon
+            const emailLink = document.querySelector('[data-social="email"]') as HTMLAnchorElement;
+            const emailIcon = document.getElementById('email-icon');
+            if (emailLink && socialLinks.email) {
+                emailLink.href = `https://mail.google.com/mail/?view=cm&to=${socialLinks.email}`;
+            }
+            if (emailIcon && socialLinks.emailIcon) {
+                const parsed = parseIcon(socialLinks.emailIcon);
+                emailIcon.className = parsed.iconClass;
+                if (parsed.color) emailIcon.style.color = parsed.color;
+            }
+            
+            // Update LinkedIn link and icon
+            const linkedinLink = document.querySelector('[data-social="linkedin"]') as HTMLAnchorElement;
+            const linkedinIcon = document.getElementById('linkedin-icon');
+            if (linkedinLink && socialLinks.linkedin) {
+                linkedinLink.href = `https://www.linkedin.com/in/${socialLinks.linkedin}`;
+            }
+            if (linkedinIcon && socialLinks.linkedinIcon) {
+                const parsed = parseIcon(socialLinks.linkedinIcon);
+                linkedinIcon.className = parsed.iconClass;
+                if (parsed.color) linkedinIcon.style.color = parsed.color;
+            }
+            
+            // Update Instagram link and icon
+            const instagramLink = document.querySelector('[data-social="instagram"]') as HTMLAnchorElement;
+            const instagramIcon = document.getElementById('instagram-icon');
+            if (instagramLink && socialLinks.instagram) {
+                instagramLink.href = `https://www.instagram.com/${socialLinks.instagram}`;
+            }
+            if (instagramIcon && socialLinks.instagramIcon) {
+                const parsed = parseIcon(socialLinks.instagramIcon);
+                instagramIcon.className = parsed.iconClass;
+                if (parsed.color) instagramIcon.style.color = parsed.color;
+            }
+            
+            // Update YouTube link and icon
+            const youtubeLink = document.querySelector('[data-social="youtube"]') as HTMLAnchorElement;
+            const youtubeIcon = document.getElementById('youtube-icon');
+            if (youtubeLink && socialLinks.youtube) {
+                youtubeLink.href = `https://youtube.com/${socialLinks.youtube}`;
+            }
+            if (youtubeIcon && socialLinks.youtubeIcon) {
+                const parsed = parseIcon(socialLinks.youtubeIcon);
+                youtubeIcon.className = parsed.iconClass;
+                if (parsed.color) youtubeIcon.style.color = parsed.color;
+            }
+            
+        } catch (e) {
+            console.error('Failed to sync social links:', e);
+        }
+    }
+    
+    // Run on page load
+    syncSocialLinks();
+</script>

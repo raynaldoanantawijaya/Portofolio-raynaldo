@@ -1,0 +1,63 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="404 - Halaman Tidak Ditemukan">
+    <section class="error-container">
+        <h1>404</h1>
+        <h2>Halaman Tidak Ditemukan</h2>
+        <p>Maaf, halaman yang Anda cari mungkin telah dipindahkan atau tidak tersedia.</p>
+        <a href="/" class="btn-home">Kembali ke Beranda</a>
+    </section>
+</Layout>
+
+<style>
+    .error-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh; /* Not full 100vh to accommodate header/footer nicely if present, but centered */
+        text-align: center;
+        padding: 2rem;
+        /* Padding top to account for fixed header if layout includes it, but layout slot usually handles it? 
+           Actually Layout has header built-in, but page content usually needs padding-top. 
+           Let's match section padding */
+        padding-top: 100px; 
+    }
+
+    h1 {
+        font-size: 6rem;
+        font-weight: 800;
+        color: var(--primary-color);
+        margin: 0;
+        line-height: 1;
+    }
+
+    h2 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: var(--text-lighter);
+    }
+
+    p {
+        color: var(--text-gray);
+        margin-bottom: 2rem;
+        max-width: 500px;
+    }
+
+    .btn-home {
+        padding: 12px 30px;
+        background-color: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .btn-home:hover {
+        background-color: var(--primary-light);
+        transform: translateY(-3px);
+    }
+</style>

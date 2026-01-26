@@ -1,0 +1,400 @@
+import React, { useState, useRef, useEffect } from 'react';
+import type { Project } from '../data/siteContent';
+
+interface Props {
+    project: Project;
+    onSave: (updatedProject: Project) => void;
+    onCancel: () => void;
+}
+
+export default function ProjectEditor({ project, onSave, onCancel }: Props) {
+    const [title, setTitle] = useState(project.title);
+    const [content, setContent] = useState(project.content);
+    const [coverImage, setCoverImage] = useState(project.coverImage);
+    const [status, setStatus] = useState<'draft' | 'published'>(project.status || 'published');
+    const [tags, setTags] = useState<string[]>(project.tags || []);
+    const [link, setLink] = useState(project.link);
+    const [savedRange, setSavedRange] = useState<Range | null>(null);
+    const editorRef = useRef<HTMLDivElement>(null);
+    const imageInputRef = useRef<HTMLInputElement>(null);
+    const colorInputRef = useRef<HTMLInputElement>(null);
+
+    // Initial content load
+    useEffect(() => {
+        if (editorRef.current && editorRef.current.innerHTML !== project.content) {
+            editorRef.current.innerHTML = project.content;
+        }
+    }, [project.id]);
+
+    const execCommand = (command: string, value: string | undefined = undefined) => {
+        document.execCommand(command, false, value);
+        if (editorRef.current) {
+            setContent(editorRef.current.innerHTML);
+        }
+        editorRef.current?.focus();
+    };
+
+    const handleSave = () => {
+        onSave({
+            ...project,
+            title,
+            content,
+            coverImage,
+            status,
+            tags,
+            link
+        });
+    };
+
+    const handleFeaturedImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 500000) {
+                alert('File too large (max 500KB)');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setCoverImage(ev.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const addTag = (tag: string) => {
+        if (tag && !tags.includes(tag)) {
+            setTags([...tags, tag]);
+        }
+    };
+
+    const removeTag = (tagToRemove: string) => {
+        setTags(tags.filter(t => t !== tagToRemove));
+    };
+
+    const preventFocusLoss = (e: React.MouseEvent) => {
+        e.preventDefault();
+    };
+
+    const handlePaste = async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            document.execCommand('insertText', false, text);
+            if (editorRef.current) {
+                setContent(editorRef.current.innerHTML);
+            }
+        } catch (err) {
+            alert('Tidak dapat mengakses clipboard. Gunakan Ctrl+V.');
+        }
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Gambar terlalu besar! Maksimal 2MB.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const dataUrl = ev.target?.result as string;
+                execCommand('insertImage', dataUrl);
+            };
+            reader.readAsDataURL(file);
+        }
+        // Reset input so same file can be selected again
+        e.target.value = '';
+    };
+
+    // Save current selection before color picker opens
+    const saveSelection = () => {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+            setSavedRange(selection.getRangeAt(0).cloneRange());
+        }
+    };
+
+    // Apply color with restored selection
+    const applyColor = (color: string) => {
+        if (savedRange) {
+            const selection = window.getSelection();
+            selection?.removeAllRanges();
+            selection?.addRange(savedRange);
+        }
+        execCommand('foreColor', color);
+    };
+
+    // Handle click on editor to detect image clicks
+    const handleEditorClick = (e: React.MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (target.tagName === 'IMG') {
+            // Show delete confirmation
+            if (confirm('Hapus gambar ini?')) {
+                target.remove();
+                if (editorRef.current) {
+                    setContent(editorRef.current.innerHTML);
+                }
+            }
+        }
+    };
+
+    return (
+        <div className="bg-[#121212] font-display text-slate-300 antialiased h-screen flex flex-col overflow-hidden dark">
+            {/* Header */}
+            <header className="h-14 bg-[#1e1e1e] border-b border-slate-800 flex items-center justify-between px-4 z-50">
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
+                        <div className="bg-primary p-1.5 rounded-lg text-white flex items-center justify-center">
+                            <span className="material-symbols-outlined text-[20px]">edit_document</span>
+                        </div>
+                        <h1 className="text-sm font-bold tracking-tight text-white">CMS ADMIN</h1>
+                    </div>
+                    <nav className="hidden md:flex items-center gap-1">
+                        <button onClick={onCancel} className="px-3 py-1.5 text-sm font-medium text-slate-400 hover:text-primary transition-colors">Dashboard</button>
+                        <span className="px-3 py-1.5 text-sm font-medium text-primary bg-primary/10 rounded-md cursor-default">Editor</span>
+                    </nav>
+                </div>
+                <div className="flex items-center gap-4">
+                    {/* Search Bar - Visual Only */}
+                    <div className="relative hidden sm:block">
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[18px]">search</span>
+                        <input className="pl-10 pr-4 py-1.5 text-sm bg-[#262626] border-none text-slate-200 rounded-lg focus:ring-2 focus:ring-primary w-64 placeholder:text-slate-600 outline-none" placeholder="Search..." type="text" />
+                    </div>
+                    {/* User Profile - Visual Only */}
+                    <div className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center text-xs font-bold text-slate-400">
+                        AU
+                    </div>
+                </div>
+            </header>
+
+            <div className="flex-1 flex overflow-hidden">
+                {/* Left Slim Sidebar */}
+                <aside className="w-16 bg-[#1e1e1e] border-r border-slate-800 flex flex-col items-center py-4 gap-4">
+                    <button className="p-2 text-primary bg-primary/10 rounded-lg" title="Edit Post">
+                        <span className="material-symbols-outlined text-[24px]">description</span>
+                    </button>
+                    <button onClick={onCancel} className="p-2 text-slate-500 hover:text-primary hover:bg-slate-800 rounded-lg transition-colors" title="Back to Dashboard">
+                        <span className="material-symbols-outlined text-[24px]">arrow_back</span>
+                    </button>
+                </aside>
+
+                <main className="flex-1 flex flex-col bg-[#121212] overflow-hidden">
+                    {/* Toolbar Header Row */}
+                    <div className="px-6 py-3 flex items-center justify-between bg-[#121212]">
+                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                            <span className="hover:text-primary transition-colors cursor-pointer" onClick={onCancel}>Posts</span>
+                            <span className="material-symbols-outlined text-xs">chevron_right</span>
+                            <span className="text-slate-300 font-medium">Edit Post</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest hidden sm:inline">Unsaved Changes</span>
+                            <button onClick={onCancel} className="px-4 py-1.5 text-sm font-semibold border border-slate-700 text-slate-300 rounded-lg hover:bg-slate-800 transition-colors">Cancel</button>
+                            <button onClick={handleSave} className="px-4 py-1.5 text-sm font-semibold bg-primary text-white rounded-lg hover:bg-primary/90 shadow-lg shadow-primary/10 transition-colors">Publish</button>
+                        </div>
+                    </div>
+
+                    {/* Ribbon Toolbar */}
+                    <div className="bg-[#1e1e1e] border-y border-slate-800 px-4 py-2 flex items-center flex-wrap gap-1 overflow-x-auto">
+                        <div className="flex items-center gap-1 border-r border-slate-700 pr-2 mr-2">
+                            <button onMouseDown={preventFocusLoss} onClick={handlePaste} className="flex flex-col items-center justify-center p-2 rounded hover:bg-slate-800 transition-colors min-w-[50px]">
+                                <span className="material-symbols-outlined text-primary text-[20px]">content_paste</span>
+                                <span className="text-[10px] font-medium mt-0.5 text-slate-400">Paste</span>
+                            </button>
+                        </div>
+
+                        <div className="flex items-center gap-1 border-r border-slate-700 pr-2 mr-2">
+                            <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1">
+                                    <select onChange={(e) => execCommand('fontName', e.target.value)} className="text-xs border-slate-700 bg-[#262626] text-slate-300 rounded h-7 w-28 py-0 focus:ring-primary outline-none px-1">
+                                        <option value="Inter">Inter</option>
+                                        <option value="Arial">Arial</option>
+                                        <option value="Times New Roman">Times New Roman</option>
+                                        <option value="Courier New">Courier New</option>
+                                    </select>
+                                    <select onChange={(e) => execCommand('fontSize', e.target.value)} className="text-xs border-slate-700 bg-[#262626] text-slate-300 rounded h-7 w-14 py-0 focus:ring-primary outline-none px-1">
+                                        <option value="3">Normal</option>
+                                        <option value="1">Small</option>
+                                        <option value="4">Large</option>
+                                        <option value="5">Huge</option>
+                                    </select>
+                                </div>
+                                <div className="flex items-center gap-0.5">
+                                    <button onMouseDown={preventFocusLoss} onClick={() => execCommand('bold')} className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors" title="Bold">
+                                        <span className="material-symbols-outlined font-bold text-[18px]">format_bold</span>
+                                    </button>
+                                    <button onMouseDown={preventFocusLoss} onClick={() => execCommand('italic')} className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors" title="Italic">
+                                        <span className="material-symbols-outlined text-[18px]">format_italic</span>
+                                    </button>
+                                    <button onMouseDown={preventFocusLoss} onClick={() => execCommand('underline')} className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors" title="Underline">
+                                        <span className="material-symbols-outlined text-[18px]">format_underlined</span>
+                                    </button>
+                                    <button onMouseDown={preventFocusLoss} onClick={() => execCommand('strikeThrough')} className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors" title="Strikethrough">
+                                        <span className="material-symbols-outlined text-[18px]">format_strikethrough</span>
+                                    </button>
+                                    <div className="w-px h-5 bg-slate-800 mx-1"></div>
+                                    <input
+                                        type="color"
+                                        ref={colorInputRef}
+                                        onMouseDown={saveSelection}
+                                        onChange={(e) => applyColor(e.target.value)}
+                                        className="w-6 h-6 p-0 border-0 rounded cursor-pointer bg-transparent"
+                                        title="Text Color"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-1 border-r border-slate-700 pr-2 mr-2">
+                            <div className="flex items-center gap-0.5">
+                                <button onMouseDown={preventFocusLoss} onClick={() => execCommand('insertUnorderedList')} className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors" title="Bullets">
+                                    <span className="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+                                </button>
+                                <button onMouseDown={preventFocusLoss} onClick={() => execCommand('insertOrderedList')} className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors" title="Numbering">
+                                    <span className="material-symbols-outlined text-[18px]">format_list_numbered</span>
+                                </button>
+                            </div>
+                            <div className="flex items-center gap-0.5">
+                                <button onMouseDown={preventFocusLoss} onClick={() => execCommand('justifyLeft')} className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors" title="Align Left">
+                                    <span className="material-symbols-outlined text-[18px]">format_align_left</span>
+                                </button>
+                                <button onMouseDown={preventFocusLoss} onClick={() => execCommand('justifyCenter')} className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors" title="Align Center">
+                                    <span className="material-symbols-outlined text-[18px]">format_align_center</span>
+                                </button>
+                                <button onMouseDown={preventFocusLoss} onClick={() => execCommand('justifyRight')} className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors" title="Align Right">
+                                    <span className="material-symbols-outlined text-[18px]">format_align_right</span>
+                                </button>
+                                <button onMouseDown={preventFocusLoss} onClick={() => execCommand('justifyFull')} className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors" title="Justify">
+                                    <span className="material-symbols-outlined text-[18px]">format_align_justify</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                            <input
+                                type="file"
+                                ref={imageInputRef}
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                className="hidden"
+                            />
+                            <button onMouseDown={preventFocusLoss} onClick={() => imageInputRef.current?.click()} className="flex flex-col items-center justify-center p-2 rounded hover:bg-slate-800 transition-colors min-w-[50px]">
+                                <span className="material-symbols-outlined text-slate-400 text-[20px]">image</span>
+                                <span className="text-[10px] font-medium mt-0.5 text-slate-500">Image</span>
+                            </button>
+                            <button onMouseDown={preventFocusLoss} onClick={() => {
+                                const url = prompt('Link URL:');
+                                if (url) execCommand('createLink', url);
+                            }} className="flex flex-col items-center justify-center p-2 rounded hover:bg-slate-800 transition-colors min-w-[50px]">
+                                <span className="material-symbols-outlined text-slate-400 text-[20px]">link</span>
+                                <span className="text-[10px] font-medium mt-0.5 text-slate-500">Link</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Canvas Area */}
+                    <div className="flex-1 flex overflow-hidden">
+                        <div className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-[#121212]">
+                            <div className="document-canvas relative bg-[#262626] w-full max-w-[850px] min-h-[1100px] p-8 md:p-16 rounded shadow-2xl border border-slate-800/50">
+                                <input
+                                    className="w-full text-4xl font-extrabold border-none focus:ring-0 p-0 bg-transparent text-white placeholder:text-slate-700 outline-none mb-6"
+                                    placeholder="Judul Postingan"
+                                    type="text"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                />
+                                <div
+                                    ref={editorRef}
+                                    contentEditable
+                                    onInput={(e) => setContent((e.target as HTMLElement).innerHTML)}
+                                    onClick={handleEditorClick}
+                                    className="prose prose-invert max-w-none text-slate-300 outline-none pb-20 min-h-[500px] prose-ul:list-disc prose-ol:list-decimal prose-ul:list-inside prose-ol:list-inside prose-li:marker:text-slate-400 [&_img]:cursor-pointer [&_img]:hover:ring-2 [&_img]:hover:ring-red-500 [&_img]:hover:ring-offset-2 [&_img]:hover:ring-offset-[#262626] [&_img]:transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar - Properties */}
+                        <aside className="w-72 bg-[#1e1e1e] border-l border-slate-800 overflow-y-auto flex flex-col">
+                            <div className="p-5 border-b border-slate-800">
+                                <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-slate-500 text-[18px]">settings</span>
+                                    Post Settings
+                                </h3>
+                            </div>
+
+                            {/* Publishing */}
+                            <div className="p-5 border-b border-slate-800">
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Post Status</label>
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-sm text-slate-400">Status</span>
+                                    <select
+                                        value={status}
+                                        onChange={(e) => setStatus(e.target.value as any)}
+                                        className="text-xs bg-[#262626] border-slate-700 rounded text-slate-200 outline-none focus:ring-primary"
+                                    >
+                                        <option value="draft">Draft</option>
+                                        <option value="published">Published</option>
+                                    </select>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-slate-400">Author</span>
+                                    <span className="text-sm font-semibold text-slate-200">Admin</span>
+                                </div>
+                            </div>
+
+                            {/* Project Link */}
+                            <div className="p-5 border-b border-slate-800">
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Project Link</label>
+                                <input
+                                    type="text"
+                                    value={link}
+                                    onChange={(e) => setLink(e.target.value)}
+                                    className="w-full text-sm border-slate-700 bg-[#262626] text-slate-200 rounded-lg placeholder:text-slate-600 focus:ring-primary focus:border-primary outline-none p-2"
+                                    placeholder="https://..."
+                                />
+                            </div>
+
+                            {/* Tags */}
+                            <div className="p-5 border-b border-slate-800">
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Tags</label>
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {tags.map(tag => (
+                                        <span key={tag} className="inline-flex items-center gap-1 bg-[#262626] border border-slate-700 px-2.5 py-1 rounded text-xs font-medium text-slate-300">
+                                            {tag}
+                                            <button onClick={() => removeTag(tag)} className="material-symbols-outlined !text-[14px] text-slate-500 hover:text-slate-300">close</button>
+                                        </span>
+                                    ))}
+                                </div>
+                                <input
+                                    type="text"
+                                    className="w-full text-sm border-slate-700 bg-[#262626] text-slate-200 rounded-lg placeholder:text-slate-600 focus:ring-primary focus:border-primary outline-none p-2"
+                                    placeholder="Add tags..."
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            addTag((e.target as HTMLInputElement).value);
+                                            (e.target as HTMLInputElement).value = '';
+                                        }
+                                    }}
+                                />
+                            </div>
+
+                            {/* Featured Image */}
+                            <div className="p-5">
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Featured Image</label>
+                                <div className="aspect-video rounded-lg border-2 border-dashed border-slate-800 bg-[#262626] flex flex-col items-center justify-center cursor-pointer hover:bg-slate-800 hover:border-slate-700 transition-all group overflow-hidden relative">
+                                    {coverImage ? (
+                                        <img src={coverImage} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <>
+                                            <span className="material-symbols-outlined text-slate-700 group-hover:text-slate-500 !text-3xl mb-2 transition-colors">add_photo_alternate</span>
+                                            <span className="text-xs text-slate-600 group-hover:text-slate-400 transition-colors">Click to upload image</span>
+                                        </>
+                                    )}
+                                    <input type="file" accept="image/*" onChange={handleFeaturedImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </main>
+            </div>
+        </div>
+    );
+}

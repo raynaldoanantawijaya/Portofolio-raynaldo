@@ -1,0 +1,248 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+
+// Disable prerendering for client-side dynamic content
+export const prerender = false;
+
+// Get the project ID from URL
+const { id } = Astro.params;
+---
+
+<Layout title="Detail Proyek - Raynaldo">
+    <Header />
+    
+    <div class="project-detail-container" id="project-detail">
+        <div class="loading-state">
+            <p>Memuat proyek...</p>
+        </div>
+    </div>
+    
+    <Footer />
+</Layout>
+
+<style>
+    .project-detail-container {
+        max-width: 900px;
+        margin: auto;
+        padding: 2rem;
+        padding-top: 120px;
+        min-height: 100vh;
+    }
+    
+    .loading-state {
+        text-align: center;
+        padding: 4rem;
+        color: #888;
+    }
+    
+    .project-header {
+        margin-bottom: 2rem;
+    }
+    
+    .project-title {
+        font-size: 2.5rem;
+        color: #fff;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+    
+    .project-meta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+    
+    .project-tag-detail {
+        background: rgba(108, 99, 255, 0.15);
+        color: #6C63FF;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .project-cover {
+        width: 100%;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        background: #1e1e1e;
+    }
+    
+    .project-cover img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    
+    .project-content-body {
+        color: #ccc;
+        font-size: 1.05rem;
+        line-height: 1.8;
+    }
+    
+    .project-content-body p {
+        margin-bottom: 1.5rem;
+    }
+    
+    .project-content-body h2,
+    .project-content-body h3 {
+        color: #fff;
+        margin: 2rem 0 1rem;
+    }
+    
+    .project-content-body ul,
+    .project-content-body ol {
+        padding-left: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .project-content-body li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .project-content-body img {
+        max-width: 100%;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+    }
+    
+    .project-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid #333;
+    }
+    
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background-color: #222;
+        color: #fff;
+        border-radius: 8px;
+        transition: 0.3s;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .back-btn:hover {
+        background-color: #333;
+        transform: translateY(-2px);
+    }
+    
+    .external-link-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: linear-gradient(90deg, #6C63FF, #f107a3);
+        color: #fff;
+        border-radius: 8px;
+        transition: 0.3s;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .external-link-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(108, 99, 255, 0.4);
+    }
+    
+    .not-found {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+    
+    .not-found h2 {
+        color: #fff;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .not-found p {
+        color: #888;
+        margin-bottom: 2rem;
+    }
+</style>
+
+<script define:vars={{ projectId: id }}>
+    // Load project from localStorage
+    function loadProject() {
+        const container = document.getElementById('project-detail');
+        
+        try {
+            const stored = localStorage.getItem('site_content_v1');
+            if (!stored) {
+                showNotFound(container);
+                return;
+            }
+            
+            const data = JSON.parse(stored);
+            const project = (data.projects || []).find(p => p.id === projectId);
+            
+            if (!project) {
+                showNotFound(container);
+                return;
+            }
+            
+            // Render project
+            container.innerHTML = `
+                <div class="project-header">
+                    <h1 class="project-title">${project.title}</h1>
+                    ${project.tags && project.tags.length > 0 ? `
+                        <div class="project-meta">
+                            ${project.tags.map(tag => `<span class="project-tag-detail">${tag}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                ${project.coverImage ? `
+                    <div class="project-cover">
+                        <img src="${project.coverImage}" alt="${project.title}" />
+                    </div>
+                ` : ''}
+                
+                <div class="project-content-body">
+                    ${project.content}
+                </div>
+                
+                <div class="project-actions">
+                    <a href="/#projects" class="back-btn">
+                        ← Kembali ke Proyek
+                    </a>
+                    ${project.link && project.link !== '#' ? `
+                        <a href="${project.link}" class="external-link-btn" target="_blank" rel="noopener noreferrer">
+                            Lihat Demo →
+                        </a>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Update page title
+            document.title = `${project.title} - Proyek Raynaldo`;
+            
+        } catch (e) {
+            console.error('Failed to load project:', e);
+            showNotFound(container);
+        }
+    }
+    
+    function showNotFound(container) {
+        container.innerHTML = `
+            <div class="not-found">
+                <h2>Proyek Tidak Ditemukan</h2>
+                <p>Proyek yang Anda cari tidak ada atau sudah dihapus.</p>
+                <a href="/#projects" class="back-btn">← Kembali ke Proyek</a>
+            </div>
+        `;
+    }
+    
+    // Run on page load
+    loadProject();
+</script>

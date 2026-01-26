@@ -1,0 +1,81 @@
+---
+import '../styles/global.css';
+import PWAHead from '../components/PWAHead.astro';
+
+interface Props {
+	title: string;
+    description?: string;
+    image?: string;
+    type?: string;
+}
+
+const { 
+    title,
+    description = "Portofolio Raynaldo Ananta Wijaya - Electrical Engineer, IoT Specialist, & AI Enthusiast. Spesialisasi di Robotik, Embedded Systems (ESP32), dan Solusi Smart City/Industry 4.0.",
+    image = "/assets/Foto/raynaldo.jpg",
+    type = "website"
+} = Astro.props;
+
+// Daftar kata kunci lengkap untuk SEO Trending & Typo Handling & Jasa/Solusi
+const siteKeywords = "raynaldo, raynaldo ananta, raynaldo ananta wijaya, raynaldo wijaya, ray, aldo, ray wijaya, ray ananta, raynaldo anata wijaya, raynaldo ananta w, raynaldo aw, raynaldo solo, raynaldo surakarta, raynaldo ums, raynaldo muhammadiyah, raynaldo engineer, raynaldo robot, aldo solo, aldo ums, ray solo, ray ums, pemuda solo, pemuda surakarta, tokoh muda solo, engineer solo, teknisi robot solo, pakar iot solo, raynaldo typo, rynaldo, reynaldo, raynald, reynald, aldoo, rayy, raynaldo_ananta_wijaya, ananta wijaya, ananta, wijaya, robot, robotika, robot research, ums, universitas muhammadiyah surakarta, iot engineer, electrical engineer, web developer, ai enthusiast, artificial intelligence, embedded system, esp32, arduino, skripsi elektro, tugas akhir robotika, jasa alat iot, portfolio engineer indonesia, robotic engineer Indonesia, sistem kendali, kontrol cerdas, smart city solo, smart farming indonesia, teknologi tepat guna scada, plc engineer, jasa pembuatan alat iot solo, jasa koding arduino, konsultan skripsi elektro, jasa prototype robot, solusi smart home surakarta, teknisi listrik pintar, programmer mikrokontroler, jasa 3d printing solo, riset robotika indonesia, lomba robot ums, komunitas robotika solo, workshop iot indonesia, training arduino pemula";
+---
+
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="UTF-8" />
+		<PWAHead />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        
+        <!-- SEO Primary -->
+        <title>{title}</title>
+        <meta name="title" content={title} />
+        <meta name="description" content={description} />
+        <meta name="keywords" content={siteKeywords} />
+        <meta name="author" content="Raynaldo Ananta Wijaya" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content={type} />
+        <meta property="og:url" content={Astro.url} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={new URL(image, Astro.site)} />
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={Astro.url} />
+        <meta property="twitter:title" content={title} />
+        <meta property="twitter:description" content={description} />
+        <meta property="twitter:image" content={new URL(image, Astro.site)} />
+
+		
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+		
+        <!-- ✅ Preload font dan style utama untuk mempercepat LCP -->
+        <link rel="preload" href="/assets/fonts/Poppins-Regular.woff2" as="font" type="font/woff2" crossorigin>
+        <link rel="preload" href="/assets/fonts/Poppins-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+        <link rel="preload" href="/assets/fonts/Poppins-Bold.woff2" as="font" type="font/woff2" crossorigin>
+        <link rel="preload" href="/assets/css/all.min.css" as="style">
+		
+        <!-- ✅ Local font & icon CSS -->
+        <link rel="stylesheet" href="/assets/css/all.min.css">
+       
+        <script type="application/ld+json">
+        {
+           "@context": "https://schema.org",
+           "@type": "Organization",
+           "name": "Raynaldo Ananta Wijaya",
+           "url": "https://raynaldoanantawijaya.my.id/",
+           "logo": "https://raynaldoanantawijaya.my.id/assets/Foto/logo.png"
+        }
+        </script>
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>

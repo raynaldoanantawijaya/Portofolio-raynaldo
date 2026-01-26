@@ -1,0 +1,19 @@
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="/assets/Foto/logo.png">
+
+<script>
+    import { registerSW } from 'virtual:pwa-register';
+
+    registerSW({
+        immediate: true,
+        onNeedRefresh() {
+            // Optional: Show a prompt to user to refresh
+            console.log("New content available, reload to update.");
+        },
+        onOfflineReady() {
+            console.log("App is ready to work offline.");
+        },
+    });
+</script>
